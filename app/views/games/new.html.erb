@@ -2,12 +2,14 @@
 
 <h2>  <%= @grid %>  </h2>
 
+<% @start_time %>
+
 <p> Whats the longest word you can find? </p>
 
-<form action="score" method="POST">
+<form action = "score" method = "POST">
   <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
   <%= hidden_field_tag :grid, @grid %>
+  <%= hidden_field_tag :start_time, @start_time %>
   <input type="text" name = "attempt" >
   <input type="submit">
 </form>
-

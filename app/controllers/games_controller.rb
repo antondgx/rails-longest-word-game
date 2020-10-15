@@ -4,12 +4,16 @@ require 'json'
 class GamesController < ApplicationController
   def new
     @grid = (1..10).map { |_x| ("A".."Z").to_a[rand(0..25)] }.join(" ")
+    @start_time = Time.now
   end
 
   def score
     @attempt = params[:attempt]
     @grid = params[:grid].split(" ")
-    @result = run_game(@attempt, @grid)
+    @start_time = Time.new(params[:start_time])
+    @end_time = Time.now
+
+    @result = run_game(@attempt, @grid, @start_time, @end_time)
   end
 
   private
@@ -32,20 +36,29 @@ class GamesController < ApplicationController
     not_included_count
   end
 
+  def compute_score(attempt, time_taken)
+    time_taken > 60.0 ? 0 : attempt.size * (1.0 - time_taken / 60.0)
+  end
+
   def check_word(attempt)
     raw_json = open("https://wagon-dictionary.herokuapp.com/#{attempt}").read
     parsed_json = JSON.parse(raw_json)
     return parsed_json["found"]
   end
 
-  def run_game(attempt, grid)
+  def run_game(attempt, grid, start_time, end_time)
+    results_hash = { time: end_time - start_time }
+
     if not_included?(attempt, grid).positive?
-      "the given word is not in the grid"
+      results_hash[:message] = "the given word is not in the grid"
     elsif !check_word(attempt)
-      "the given word is not an english word"
+      results_hash[:message] = "the given word is not an english word"
     else
-      "Well Done!"
+      results_hash[:score] = compute_score(attempt, end_time - start_time)
+      raise
+      results_hash[:message] = "Well Done!"
     end
+    results_hash
   end
 end
 
