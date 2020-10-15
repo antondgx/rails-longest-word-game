@@ -43,7 +43,7 @@ class GamesController < ApplicationController
   def check_word(attempt)
     raw_json = open("https://wagon-dictionary.herokuapp.com/#{attempt}").read
     parsed_json = JSON.parse(raw_json)
-    return parsed_json["found"]
+    parsed_json["found"]
   end
 
   def run_game(attempt, grid, start_time, end_time)
